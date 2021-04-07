@@ -88,6 +88,10 @@ class ProtoField:
         elif field.type == field.TYPE_ENUM:
             value_dict = descriptor.enum_types[type_name]
             valuestr = ", ".join(str(v) for v in value_dict.values())
+            # append trailing comma if enum has only one value so that valuestr
+            #   represents a valid tuple i.e. (1,) instead of (1)
+            if len(value_dict) == 1:
+                valuestr += ","
             proto_type = 'p.EnumType("{}", ({}))'.format(type_name, valuestr)
             py_type = "EnumType" + type_name
         else:
