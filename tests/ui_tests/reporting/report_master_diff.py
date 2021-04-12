@@ -1,8 +1,6 @@
-import filecmp
 import shutil
 import tempfile
 from contextlib import contextmanager
-from hashlib import sha256
 from pathlib import Path
 
 import dominate
@@ -14,33 +12,6 @@ import html  # isort:skip
 
 REPORTS_PATH = Path(__file__).parent.resolve() / "reports" / "master_diff"
 RECORDED_SCREENS_PATH = Path(__file__).parent.parent.resolve() / "screens"
-
-KNOWN_HOMESCREEN_DIGESTS = {
-    "c59f8f2b0ed8aaf3867e414415d174af36897df5b660d85d2759381244225673",
-    "bbd7f0e460737cef8b1ff68129e7495dc98dabefcaf8cf2ab24c83642b94bb8e",
-    "f15aa24b69ee594b0ff12eaeb4c58015e139871324d39bb1cfbf8703b4b8d4e1",
-    "c8c9794c23fa631e3e79cf950bd836de6c8cd36d48a83cf0e3d30e405401ef47",
-}
-
-TESTS_ONLY_DIFFER_IN_LAST_HOMESCREEN = set()
-
-
-def only_diff_is_last_homescreen(master_path, current_path):
-    master_screens = sorted(master_path.iterdir())
-    current_screens = sorted(current_path.iterdir())
-
-    if len(current_screens) != len(master_screens) - 1:
-        # we are looking for last screen missing
-        return False
-
-    for left, right in zip(master_screens[:-1], current_screens):
-        # all preceding screens must be identical
-        if not filecmp.cmp(left, right):
-            return False
-
-    last_screen = master_screens[-1]
-    digest = sha256(last_screen.read_bytes()).hexdigest()
-    return digest in KNOWN_HOMESCREEN_DIGESTS
 
 
 def get_diff():
@@ -162,20 +133,9 @@ def index():
         br()
         hr()
 
-        diff_only_in_last_homescreen = [
-            d for d in diff if d.stem in TESTS_ONLY_DIFFER_IN_LAST_HOMESCREEN
-        ]
-        diff_actual = [
-            d for d in diff if d.stem not in TESTS_ONLY_DIFFER_IN_LAST_HOMESCREEN
-        ]
-
         h2("Differs:", style="color: grey;")
         i("UI fixtures that have been modified:")
-        html.report_links(diff_actual, REPORTS_PATH)
-
-        h2("Differs in last homescreen only:", style="color: grey;")
-        i("UI fixtures that have been modified:")
-        html.report_links(diff_only_in_last_homescreen, REPORTS_PATH)
+        html.report_links(diff, REPORTS_PATH)
 
     return html.write(REPORTS_PATH, doc, "index.html")
 
@@ -224,8 +184,6 @@ def create_reports():
                 master_hash,
                 current_hash,
             )
-            if only_diff_is_last_homescreen(master_screens, current_screens):
-                TESTS_ONLY_DIFFER_IN_LAST_HOMESCREEN.add(test_name)
 
 
 if __name__ == "__main__":
