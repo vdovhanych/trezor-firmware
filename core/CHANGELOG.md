@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Cardano: Allow stake pool registrations with zero margin.  [#1502]
 - Cardano: Assets are now shown as CIP-0014.  [#1510]
 - Support PIN of unlimited length.  [#1167]
+- Reduce memory fragmentation by clearing memory after every workflow.  [#1565]
 
 ### Deprecated
 
@@ -385,3 +386,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 [#1502]: https://github.com/trezor/trezor-firmware/issues/1502
 [#1510]: https://github.com/trezor/trezor-firmware/issues/1510
 [#1518]: https://github.com/trezor/trezor-firmware/pull/1518
+[#1565]: https://github.com/trezor/trezor-firmware/issues/1565
