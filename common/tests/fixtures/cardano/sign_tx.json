@@ -593,7 +593,6 @@
         "certificates": [],
         "withdrawals": [],
         "auxiliary_data": {
-          "type": 0,
           "blob": "a200a11864a118c843aa00ff01a119012c590100aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         },
         "input_flow": [["SWIPE", "YES"], ["YES"], ["SWIPE", "YES"]],
@@ -626,19 +625,15 @@
         "certificates": [],
         "withdrawals": [],
         "auxiliary_data": {
-          "type": 1,
-          "metadata": {
-            "type": 0,
-            "catalyst_registration_parameters": {
-              "voting_public_key": "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
-              "staking_path": "m/1852'/1815'/0'/2/0",
-              "reward_address_parameters": {
-                "addressType": 0,
-                "path": "m/1852'/1815'/0'/0/0",
-                "stakingPath": "m/1852'/1815'/0'/2/0"
-              },
-              "nonce": 22634813
-            }
+          "catalyst_registration_parameters": {
+            "voting_public_key": "1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc",
+            "staking_path": "m/1852'/1815'/0'/2/0",
+            "reward_address_parameters": {
+              "addressType": 0,
+              "path": "m/1852'/1815'/0'/0/0",
+              "stakingPath": "m/1852'/1815'/0'/2/0"
+            },
+            "nonce": 22634813
           }
         },
         "input_flow": [["SWIPE", "SWIPE", "YES"], ["SWIPE", "SWIPE", "SWIPE", "SWIPE", "SWIPE", "YES"], ["YES"], ["SWIPE", "YES"]],

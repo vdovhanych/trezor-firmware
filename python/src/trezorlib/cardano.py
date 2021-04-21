@@ -329,57 +329,33 @@ def parse_auxiliary_data(auxiliary_data) -> messages.CardanoTxAuxiliaryDataType:
         "Auxiliary data is missing some fields"
     )
 
-    if "type" not in auxiliary_data:
-        raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
-
-    auxiliary_data_type = auxiliary_data["type"]
-    if auxiliary_data_type == messages.CardanoAuxiliaryDataType.BLOB:
-        if "blob" not in auxiliary_data:
-            raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
-
+    if "blob" in auxiliary_data:
         return messages.CardanoTxAuxiliaryDataType(
-            type=auxiliary_data_type,
             blob=bytes.fromhex(auxiliary_data["blob"]),
         )
-    elif auxiliary_data_type == messages.CardanoAuxiliaryDataType.TUPLE:
-        if "metadata" not in auxiliary_data:
+    elif "catalyst_registration_parameters" in auxiliary_data:
+        catalyst_registration = auxiliary_data["catalyst_registration_parameters"]
+        if not all(
+            k in catalyst_registration for k in REQUIRED_FIELDS_CATALYST_REGISTRATION
+        ):
             raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
 
-        metadata = auxiliary_data["metadata"]
-        if "type" not in metadata:
-            raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
-
-        metadata_type = metadata["type"]
-        if metadata_type == messages.CardanoMetadataType.CATALYST_REGISTRATION:
-            catalyst_registration = metadata["catalyst_registration_parameters"]
-            if not all(
-                k in catalyst_registration
-                for k in REQUIRED_FIELDS_CATALYST_REGISTRATION
-            ):
-                raise AUXILIARY_DATA_MISSING_FIELDS_ERROR
-
-            catalyst_registration_parameters = (
-                messages.CardanoCatalystRegistrationParametersType(
-                    voting_public_key=bytes.fromhex(
-                        catalyst_registration["voting_public_key"]
-                    ),
-                    staking_path=tools.parse_path(
-                        catalyst_registration["staking_path"]
-                    ),
-                    nonce=catalyst_registration["nonce"],
-                    reward_address_parameters=_parse_address_parameters(
-                        catalyst_registration["reward_address_parameters"]
-                    ),
-                )
-            )
-
-            return messages.CardanoTxAuxiliaryDataType(
-                type=auxiliary_data_type,
-                metadata=messages.CardanoTxMetadataType(
-                    type=metadata_type,
-                    catalyst_registration_parameters=catalyst_registration_parameters,
+        catalyst_registration_parameters = (
+            messages.CardanoCatalystRegistrationParametersType(
+                voting_public_key=bytes.fromhex(
+                    catalyst_registration["voting_public_key"]
+                ),
+                staking_path=tools.parse_path(catalyst_registration["staking_path"]),
+                nonce=catalyst_registration["nonce"],
+                reward_address_parameters=_parse_address_parameters(
+                    catalyst_registration["reward_address_parameters"]
                 ),
             )
+        )
+
+        return messages.CardanoTxAuxiliaryDataType(
+            catalyst_registration_parameters=catalyst_registration_parameters,
+        )
 
     raise ValueError("Invalid auxiliary_data type")
 

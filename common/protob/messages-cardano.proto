@@ -39,27 +39,6 @@ enum CardanoPoolRelayType {
 }
 
 /**
- * Auxiliary data can be sent:
- * - directly as a BLOB - it will be included in the tx directly
- * - as an object with the metadata field set. The metadata object will first be wrapped
- *     in a TUPLE with an empty array added to it and then CBOR encoded. This
- *     is done to be in accordance with the CDDL spec and other Cardano tools.
- */
-enum CardanoAuxiliaryDataType {
-  BLOB = 0;
-  TUPLE = 1;
-}
-
-/**
- * We currently only support CATALYST_REGISTRATION. Enum is used so
- * that the use of Catalyst registration is explicit and so that new
- * types can be easily added later.
- */
-enum CardanoMetadataType {
-  CATALYST_REGISTRATION = 0;
-}
-
-/**
  * Structure representing cardano PointerAddress pointer,
  * which points to a staking key registration certificate.
  * @embed
@@ -249,15 +228,9 @@ message CardanoSignTx {
         required uint64 nonce = 4;
     }
 
-    message CardanoTxMetadataType {
-        required CardanoMetadataType type = 1;
-        optional CardanoCatalystRegistrationParametersType catalyst_registration_parameters = 2;
-    }
-
     message CardanoTxAuxiliaryDataType {
-        required CardanoAuxiliaryDataType type = 1;
-        optional bytes blob = 2;
-        optional CardanoTxMetadataType metadata = 3;
+        optional bytes blob = 1;
+        optional CardanoCatalystRegistrationParametersType catalyst_registration_parameters = 2;
     }
 }
 

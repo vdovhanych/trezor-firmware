@@ -1,10 +1,6 @@
 from trezor.crypto import hashlib
 from trezor.crypto.curve import ed25519
-from trezor.messages import (
-    CardanoAddressType,
-    CardanoAuxiliaryDataType,
-    CardanoMetadataType,
-)
+from trezor.messages import CardanoAddressType
 
 from apps.common import cbor
 
@@ -23,7 +19,6 @@ if False:
         CardanoCatalystRegistrationParametersType,
     )
     from trezor.messages.CardanoTxAuxiliaryDataType import CardanoTxAuxiliaryDataType
-    from trezor.messages.CardanoTxMetadataType import CardanoTxMetadataType
 
     CatalystRegistrationPayload = dict[int, Union[bytes, int]]
     CatalystRegistrationSignature = dict[int, bytes]
@@ -50,22 +45,15 @@ def validate_auxiliary_data(
     if not auxiliary_data:
         return
 
-    if auxiliary_data.type == CardanoAuxiliaryDataType.BLOB:
-        if not auxiliary_data.blob:
-            raise INVALID_AUXILIARY_DATA
-
+    if auxiliary_data.blob:
         _validate_auxiliary_data_blob(auxiliary_data.blob)
-    elif auxiliary_data.type == CardanoAuxiliaryDataType.TUPLE:
-        if auxiliary_data.blob:
-            raise INVALID_AUXILIARY_DATA
-
-        # currently only metadata is supported as part of auxiliary data
-        if auxiliary_data.metadata:
-            _validate_metadata(
-                keychain, auxiliary_data.metadata, protocol_magic, network_id
-            )
-        else:
-            raise INVALID_AUXILIARY_DATA
+    elif auxiliary_data.catalyst_registration_parameters:
+        _validate_catalyst_registration_parameters(
+            keychain,
+            auxiliary_data.catalyst_registration_parameters,
+            protocol_magic,
+            network_id,
+        )
     else:
         raise INVALID_AUXILIARY_DATA
 
@@ -75,23 +63,6 @@ def _validate_auxiliary_data_blob(auxiliary_data_blob: bytes) -> None:
         # this also raises an error if there's some data remaining
         cbor.decode(auxiliary_data_blob)
     except Exception:
-        raise INVALID_AUXILIARY_DATA
-
-
-def _validate_metadata(
-    keychain: seed.Keychain,
-    metadata: CardanoTxMetadataType,
-    protocol_magic: int,
-    network_id: int,
-) -> None:
-    if metadata.type == CardanoMetadataType.CATALYST_REGISTRATION:
-        _validate_catalyst_registration_parameters(
-            keychain,
-            metadata.catalyst_registration_parameters,
-            protocol_magic,
-            network_id,
-        )
-    else:
         raise INVALID_AUXILIARY_DATA
 
 
@@ -133,39 +104,21 @@ async def show_auxiliary_data(
     if not auxiliary_data:
         return
 
-    if auxiliary_data.metadata:
-        await _show_metadata(
-            ctx, keychain, auxiliary_data.metadata, protocol_magic, network_id
+    if auxiliary_data.catalyst_registration_parameters:
+        await _show_catalyst_registration(
+            ctx,
+            keychain,
+            auxiliary_data.catalyst_registration_parameters,
+            protocol_magic,
+            network_id,
         )
 
     auxiliary_data_bytes = get_auxiliary_data_cbor(
         keychain, auxiliary_data, protocol_magic, network_id
     )
-    # get_auxiliary_data_bytes returns none only if auxiliary_data is None, which is checked above
-    assert auxiliary_data_bytes is not None
 
     auxiliary_data_hash = hash_auxiliary_data(bytes(auxiliary_data_bytes))
     await show_auxiliary_data_hash(ctx, auxiliary_data_hash)
-
-
-async def _show_metadata(
-    ctx: wire.Context,
-    keychain: seed.Keychain,
-    metadata: CardanoTxMetadataType,
-    protocol_magic: int,
-    network_id: int,
-) -> None:
-    if metadata.type == CardanoMetadataType.CATALYST_REGISTRATION:
-        # ensured by _validate_metadata
-        assert metadata.catalyst_registration_parameters is not None
-
-        await _show_catalyst_registration(
-            ctx,
-            keychain,
-            metadata.catalyst_registration_parameters,
-            protocol_magic,
-            network_id,
-        )
 
 
 async def _show_catalyst_registration(
@@ -197,40 +150,18 @@ def get_auxiliary_data_cbor(
     protocol_magic: int,
     network_id: int,
 ) -> bytes:
-    if auxiliary_data.type == CardanoAuxiliaryDataType.BLOB:
-        # ensured by _validate_auxiliary_data
-        assert auxiliary_data.blob is not None
-
+    if auxiliary_data.blob:
         return auxiliary_data.blob
-    elif auxiliary_data.type == CardanoAuxiliaryDataType.TUPLE:
-        # currently only metadata is supported as part of auxiliary data
-        if auxiliary_data.metadata:
-            cborized_metadata = _cborize_metadata(
-                keychain, auxiliary_data.metadata, protocol_magic, network_id
-            )
-            return cbor.encode(_wrap_metadata(cborized_metadata))
-        else:
-            raise INVALID_AUXILIARY_DATA
-    else:
-        raise INVALID_AUXILIARY_DATA
-
-
-def _cborize_metadata(
-    keychain: seed.Keychain,
-    metadata: CardanoTxMetadataType,
-    protocol_magic: int,
-    network_id: int,
-) -> CatalystRegistration:
-    if metadata.type == CardanoMetadataType.CATALYST_REGISTRATION:
-        # ensured by _validate_metadata
-        assert metadata.catalyst_registration_parameters is not None
-
-        return _cborize_catalyst_registration(
+    elif auxiliary_data.catalyst_registration_parameters:
+        cborized_catalyst_registration = _cborize_catalyst_registration(
             keychain,
-            metadata.catalyst_registration_parameters,
+            auxiliary_data.catalyst_registration_parameters,
             protocol_magic,
             network_id,
         )
+        return cbor.encode(_wrap_metadata(cborized_catalyst_registration))
+    else:
+        raise INVALID_AUXILIARY_DATA
 
 
 def _cborize_catalyst_registration(
