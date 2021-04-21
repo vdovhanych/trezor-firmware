@@ -29,7 +29,7 @@ class CardanoTxAuxiliaryDataType(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('type', p.EnumType("CardanoAuxiliaryDataType", (0, 1)), p.FLAG_REQUIRED),
+            1: ('type', p.EnumType("CardanoAuxiliaryDataType", (0, 1,)), p.FLAG_REQUIRED),
             2: ('blob', p.BytesType, None),
             3: ('metadata', CardanoTxMetadataType, None),
         }
