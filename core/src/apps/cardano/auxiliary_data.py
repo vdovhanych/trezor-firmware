@@ -9,7 +9,7 @@ from trezor.messages import (
 from apps.common import cbor
 
 from .address import derive_address_bytes, derive_human_readable_address
-from .helpers import INVALID_AUXILIARY_DATA, bech32, metadata_dict_keys
+from .helpers import INVALID_AUXILIARY_DATA, bech32
 from .helpers.bech32 import HRP_JORMUN_PUBLIC_KEY
 from .helpers.paths import SCHEMA_STAKING_ANY_ACCOUNT
 from .helpers.utils import derive_public_key
@@ -36,6 +36,9 @@ if False:
 AUXILIARY_DATA_HASH_SIZE = 32
 CATALYST_VOTING_PUBLIC_KEY_LENGTH = 32
 CATALYST_REGISTRATION_HASH_SIZE = 32
+
+METADATA_KEY_CATALYST_REGISTRATION = 61284
+METADATA_KEY_CATALYST_REGISTRATION_SIGNATURE = 61285
 
 
 def validate_auxiliary_data(
@@ -262,8 +265,8 @@ def _cborize_catalyst_registration(
     catalyst_registration_signature = {1: catalyst_registration_payload_signature}
 
     return {
-        metadata_dict_keys.CATALYST_REGISTRATION: catalyst_registration_payload,
-        metadata_dict_keys.CATALYST_REGISTRATION_SIGNATURE: catalyst_registration_signature,
+        METADATA_KEY_CATALYST_REGISTRATION: catalyst_registration_payload,
+        METADATA_KEY_CATALYST_REGISTRATION_SIGNATURE: catalyst_registration_signature,
     }
 
 
@@ -275,7 +278,7 @@ def _create_catalyst_registration_payload_signature(
     node = keychain.derive(path)
 
     encoded_catalyst_registration = cbor.encode(
-        {metadata_dict_keys.CATALYST_REGISTRATION: catalyst_registration_payload}
+        {METADATA_KEY_CATALYST_REGISTRATION: catalyst_registration_payload}
     )
 
     catalyst_registration_hash = hashlib.blake2b(
