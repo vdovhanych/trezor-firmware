@@ -60,7 +60,8 @@ def validate_auxiliary_data(
 
 def _validate_auxiliary_data_blob(auxiliary_data_blob: bytes) -> None:
     try:
-        # this also raises an error if there's some data remaining
+        # validation to prevent CBOR injection and invalid CBOR
+        # we don't validate data format, just that it's a valid CBOR
         cbor.decode(auxiliary_data_blob)
     except Exception:
         raise INVALID_AUXILIARY_DATA
